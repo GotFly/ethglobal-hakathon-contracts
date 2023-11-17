@@ -1,15 +1,17 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-import "./LoanCreditor.sol";
+import "./LoanBorrower.sol";
 
-contract Loan is LoanCreditor {
+contract Loan is LoanBorrower {
 
     /// Constructor
+    /// @param _borrowerLPToken uint
+    /// @param _collateralFactorAmount uint
     /// @param _baseCreditorsLPAmount uint
     /// @param _baseCreditorsStableAmount uint
-    constructor(uint _baseCreditorsLPAmount, uint _baseCreditorsStableAmount)
-    LoanCreditor(_baseCreditorsLPAmount, _baseCreditorsStableAmount)
+    constructor(ILPERC20 _borrowerLPToken, uint _collateralFactorAmount, uint _baseCreditorsLPAmount, uint _baseCreditorsStableAmount)
+    LoanBorrower(_borrowerLPToken, _collateralFactorAmount, _baseCreditorsLPAmount, _baseCreditorsStableAmount)
     {}
 }
 

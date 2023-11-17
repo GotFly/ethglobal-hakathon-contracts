@@ -13,6 +13,8 @@ abstract contract LoanCreditor is Ownable, ReentrancyGuard {
     event AddCreditorLiquidityEvent(address _creditorAddress, uint _stableAmount, uint _lpAmount);
     event RemoveCreditorLiquidityEvent(address _creditorAddress, uint _stableAmount, uint _lpAmount);
     event AddCreditorLandingInterestEvent(uint _stableAmount);
+    event CreateBorrowerLoanEvent(address _borrowerAddress, uint _stableAmount);
+    event CloseBorrowerLoanEvent(address _borrowerAddress, uint _lpAmount);
 
     struct Creditor {
         bool exists;
@@ -40,6 +42,12 @@ abstract contract LoanCreditor is Ownable, ReentrancyGuard {
     /// @return uint
     function getCreditorStablePool() public view returns(uint) {
         return creditorStablePool;
+    }
+
+    /// Return creditor stable token
+    /// @return IERC20
+    function getCreditorStableToken() public view returns(IERC20) {
+        return creditorStableToken;
     }
 
     /// Set creditor stable token
@@ -130,6 +138,29 @@ abstract contract LoanCreditor is Ownable, ReentrancyGuard {
         creditorStablePool += _stableAmount;
 
         emit AddCreditorLandingInterestEvent(_stableAmount);
+    }
+
+    /// Create borrower loan
+    /// @param _borrowerAddress address
+    /// @param _stableAmount uint
+    function createBorrowerLoan(address _borrowerAddress, uint _stableAmount) internal {
+        require(creditorStablePool >= _stableAmount, "LoanCreditor: stable pool is not enough");
+        require(creditorStableToken.balanceOf(address(this)) >= _stableAmount, "LoanCreditor: stable balance is not enough");
+
+        creditorStableToken.transfer(_borrowerAddress, _stableAmount);
+
+        emit CreateBorrowerLoanEvent(_borrowerAddress, _stableAmount);
+    }
+
+    /// Close borrower loan
+    /// @param _borrowerAddress address
+    /// @param _lpAmount uint
+    function closeBorrowerLoan(address _borrowerAddress, uint _lpAmount) internal {
+        require(creditorLPToken.balanceOf(address(this)) >= _lpAmount, "LoanCreditor: LP balance is not enough");
+
+        creditorLPToken.transfer(_borrowerAddress, _lpAmount);
+
+        emit CloseBorrowerLoanEvent(_borrowerAddress, _lpAmount);
     }
 }
 
