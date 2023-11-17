@@ -1,10 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import "./libs/Ownable.sol";
+import "./libs/ReentrancyGuard.sol";
 import "./interfaces/IERC20.sol";
 import "./interfaces/ILPERC20.sol";
+import "hardhat/console.sol";
 
 abstract contract LoanCreditor is Ownable, ReentrancyGuard {
 
@@ -14,7 +15,7 @@ abstract contract LoanCreditor is Ownable, ReentrancyGuard {
     event RemoveCreditorLiquidityEvent(address _creditorAddress, uint _stableAmount, uint _lpAmount);
     event AddCreditorLandingInterestEvent(uint _stableAmount);
     event CreateBorrowerLoanEvent(address _borrowerAddress, uint _stableAmount);
-    event CloseBorrowerLoanEvent(address _borrowerAddress, uint _lpAmount);
+    event RemoveBorrowerLoanEvent(address _borrowerAddress, uint _lpAmount);
 
     struct Creditor {
         bool exists;
@@ -150,17 +151,6 @@ abstract contract LoanCreditor is Ownable, ReentrancyGuard {
         creditorStableToken.transfer(_borrowerAddress, _stableAmount);
 
         emit CreateBorrowerLoanEvent(_borrowerAddress, _stableAmount);
-    }
-
-    /// Close borrower loan
-    /// @param _borrowerAddress address
-    /// @param _lpAmount uint
-    function closeBorrowerLoan(address _borrowerAddress, uint _lpAmount) internal {
-        require(creditorLPToken.balanceOf(address(this)) >= _lpAmount, "LoanCreditor: LP balance is not enough");
-
-        creditorLPToken.transfer(_borrowerAddress, _lpAmount);
-
-        emit CloseBorrowerLoanEvent(_borrowerAddress, _lpAmount);
     }
 }
 

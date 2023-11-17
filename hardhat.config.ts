@@ -4,6 +4,9 @@ import "@openzeppelin/hardhat-upgrades";
 
 require('dotenv').config();
 
+import './tasks/accounts_task';
+import './tasks/deployloan_task';
+
 const config = {
   solidity: {
     version: "0.8.17",
@@ -32,6 +35,41 @@ const config = {
         process.env.OWNER_5_PK_LOCALHOST,
       ],
       chainId: 31337
+    },
+    arbitrumMainnet: {
+      url: process.env.NETWORK_HOST_ARBITRUM,
+      accounts: [process.env.OWNER_PK_FINANCE],
+      chainId: 42161
+    },
+    polygonMainnet: {
+      url: process.env.NETWORK_HOST_POLYGON,
+      accounts: [process.env.OWNER_PK_FINANCE],
+      chainId: 137
+    },
+    gnosisMainnet: {
+      url: process.env.NETWORK_HOST_GNOSIS,
+      accounts: [process.env.OWNER_PK_FINANCE],
+      chainId: 100
+    },
+    mantleMainnet: {
+      url: process.env.NETWORK_HOST_MANTLE,
+      accounts: [process.env.OWNER_PK_FINANCE],
+      chainId: 5000
+    },
+    celoMainnet: {
+      url: process.env.NETWORK_HOST_CELO,
+      accounts: [process.env.OWNER_PK_FINANCE],
+      chainId: 42220
+    },
+    baseMainnet: {
+      url: process.env.NETWORK_HOST_BASE,
+      accounts: [process.env.OWNER_PK_FINANCE],
+      chainId: 8453
+    },
+    xdcMainnet: {
+      url: process.env.NETWORK_HOST_XDC,
+      accounts: [process.env.OWNER_PK_FINANCE],
+      chainId: 50
     },
   },
 };

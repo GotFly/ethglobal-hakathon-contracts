@@ -2,12 +2,13 @@
 pragma solidity ^0.8.17;
 
 import "./LoanCreditor.sol";
+import "hardhat/console.sol";
 
 abstract contract LoanBorrower is LoanCreditor {
 
     event SetBorrowerLPTokenEvent(address _tokenAddress);
     event SetCollateralFactorAmountEvent(uint _amount);
-    event SetBorrowersLPDataEvent(uint _baseBorrowersLPAmount, uint _baseBorrowersStableAmount);
+    event SetBorrowersLPDataEvent(uint _baseBorrowersStableAmount);
     event InitBorrowerLoanEvent(address _borrowerAddress, uint _lpAmount, uint _stableAmount);
     event CloseBorrowerLoanEvent(address _borrowerAddress, uint _lpAmount, uint _stableAmount);
 
@@ -16,11 +17,11 @@ abstract contract LoanBorrower is LoanCreditor {
         bool hasLoan;
         uint lpBalanceInit;
         uint stableBalanceInit;
+        uint blockNumberInit;
         uint lpBalanceCurrent;
         uint stableBalanceCurrent;
     }
 
-    uint public baseBorrowersLPAmount; // mb it not needed, if we can based our calculation on LPs totalSupply
     uint public baseBorrowersStableAmount;
     mapping(address => Borrower) public borrowers;
     uint private borrowerLPPool;
@@ -44,6 +45,13 @@ abstract contract LoanBorrower is LoanCreditor {
         return collateralFactorAmount;
     }
 
+    /// Return borrower data
+    /// @param _borrowerAddress address
+    /// @return Borrower
+    function getBorrowerData(address _borrowerAddress) external view returns(Borrower memory) {
+        return borrowers[_borrowerAddress];
+    }
+
     /// Set borrower LP token
     /// @param _lpToken ILPERC20
     function setBorrowerLPToken(IERC20 _lpToken) public onlyOwner {
@@ -62,23 +70,20 @@ abstract contract LoanBorrower is LoanCreditor {
     }
 
     /// Set borrower LP data (method for deployment, not for production)
-    /// @param _baseBorrowersLPAmount uint
     /// @param _baseBorrowersStableAmount uint
-    function setBorrowersLPData(uint _baseBorrowersLPAmount, uint _baseBorrowersStableAmount) public onlyOwner {
-        baseBorrowersLPAmount = _baseBorrowersLPAmount;
+    function setBorrowersLPData(uint _baseBorrowersStableAmount) public onlyOwner {
         baseBorrowersStableAmount = _baseBorrowersStableAmount;
 
-        emit SetBorrowersLPDataEvent(_baseBorrowersLPAmount, _baseBorrowersStableAmount);
+        emit SetBorrowersLPDataEvent(_baseBorrowersStableAmount);
     }
 
     /// Calculate borrower loan stable amount (borrower take loan)
     /// @param _lpAmount uint
     /// @return uint
     function calcBorrowerLoanStableAmount(uint _lpAmount) internal view returns(uint) {
-        // uint baseAmount = _lpAmount * baseBorrowersStableAmount / baseBorrowersLPAmount;
         uint baseAmount = _lpAmount * baseBorrowersStableAmount / borrowerLPToken.totalSupply();
 
-        return baseAmount * 100 / collateralFactorAmount;
+        return baseAmount * collateralFactorAmount / 100;
     }
 
     /// Calculate borrower loan stable amount (borrower returns loan)
@@ -89,7 +94,9 @@ abstract contract LoanBorrower is LoanCreditor {
         // uint baseAmount = _lpAmount * baseBorrowersLPAmount / baseBorrowersStableAmount;
         uint baseAmount = _stableAmount * borrowerLPToken.totalSupply() / baseBorrowersStableAmount;
 
-        return baseAmount * collateralFactorAmount / 100;
+        uint res = baseAmount * 100 / collateralFactorAmount;
+
+        return res;
     }
 
     /// Init borrow loan
@@ -110,6 +117,7 @@ abstract contract LoanBorrower is LoanCreditor {
 
         borrowers[senderAddress].lpBalanceInit = _lpAmount;
         borrowers[senderAddress].stableBalanceInit = _lpAmount;
+        borrowers[senderAddress].blockNumberInit = block.number;
         borrowers[senderAddress].lpBalanceCurrent = _lpAmount;
         borrowers[senderAddress].stableBalanceCurrent = _lpAmount;
 
@@ -129,13 +137,21 @@ abstract contract LoanBorrower is LoanCreditor {
         getCreditorStableToken().transferFrom(senderAddress, selfAddress, _stableAmount);
 
         uint lpAmount = calcBorrowerLoanLPAmount(_stableAmount);
-        closeBorrowerLoan(senderAddress, lpAmount);
+        require(borrowerLPToken.balanceOf(address(this)) >= lpAmount, "LoanBorrower: LP balance is not enough");
+        borrowerLPToken.transfer(senderAddress, lpAmount);
 
         borrowers[senderAddress].lpBalanceInit = 0;
         borrowers[senderAddress].stableBalanceInit = 0;
+        borrowers[senderAddress].blockNumberInit = 0;
         borrowers[senderAddress].lpBalanceCurrent = 0;
         borrowers[senderAddress].stableBalanceCurrent = 0;
 
         emit CloseBorrowerLoanEvent(senderAddress, lpAmount, _stableAmount);
+    }
+
+    /// Liquidation borrower loan
+    /// @param _borrowerAddress address
+    function liquidBorrowerLoan(address _borrowerAddress) external nonReentrant {
+        // TODO: add liquidation logic
     }
 }
