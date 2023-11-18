@@ -5,6 +5,7 @@ import "./libs/Ownable.sol";
 import "./libs/ReentrancyGuard.sol";
 import "./interfaces/IERC20.sol";
 import "./interfaces/ILPERC20.sol";
+import "./interfaces/ILoanExchanger.sol";
 
 abstract contract LoanCreditor is Ownable, ReentrancyGuard {
 
@@ -20,6 +21,7 @@ abstract contract LoanCreditor is Ownable, ReentrancyGuard {
     struct Creditor {
         bool exists;
         uint lpBalance;
+        uint stableBalance;
     }
 
     uint public baseCreditorsLPAmount;
@@ -144,6 +146,7 @@ abstract contract LoanCreditor is Ownable, ReentrancyGuard {
 
         creditors[senderAddress].exists = true;
         creditors[senderAddress].lpBalance += lpAmount;
+        creditors[senderAddress].stableBalance += _stableAmount;
         creditorStablePool += _stableAmount;
 
         creditorLPToken.mint(senderAddress, lpAmount);
@@ -167,6 +170,7 @@ abstract contract LoanCreditor is Ownable, ReentrancyGuard {
         require(creditorStableToken.balanceOf(address(this)) >= stableAmount, "LoanCreditor: not enough liquidity");
 
         creditors[senderAddress].lpBalance -= _lpAmount;
+        creditors[senderAddress].stableBalance -= stableAmount;
         creditorStablePool -= stableAmount;
 
         creditorStableToken.transfer(senderAddress, stableAmount);
@@ -204,12 +208,6 @@ abstract contract LoanCreditor is Ownable, ReentrancyGuard {
     /// @return uint
     function calcCreditorProfitInLP(uint _fullProfitInLp) internal view returns(uint) {
         return _fullProfitInLp * creditorProfitInPercent / 100;
-    }
-
-    /// Charge creditor profit
-    /// @param _lpAmount uint
-    function chargeCreditorProfit(uint _lpAmount) internal {
-        //TODO: add charging creditor profit
     }
 }
 

@@ -30,4 +30,10 @@ abstract contract BaseLpToken is ERC20 {
     function burn(address _account, uint256 _amount) external onlyManipulator {
         _burn(_account, _amount);
     }
+
+    /// Burn self tokens
+    /// @param _amount uint256
+    function selfBurn(uint256 _amount) external {
+        _burn(msg.sender, _amount);
+    }
 }

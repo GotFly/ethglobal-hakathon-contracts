@@ -19,4 +19,8 @@ interface ILPERC20 is IERC20 {
     /// @param _account address
     /// @param _amount uint256
     function burn(address _account, uint256 _amount) external;
+
+    /// Burn self tokens
+    /// @param _amount uint256
+    function selfBurn(uint256 _amount) external;
 }

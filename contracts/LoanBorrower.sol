@@ -2,13 +2,12 @@
 pragma solidity ^0.8.17;
 
 import "./LoanCreditor.sol";
-import "hardhat/console.sol";
+import "./LoanExchanger.sol";
 
 abstract contract LoanBorrower is LoanCreditor {
 
     event SetBorrowerLPTokenEvent(address _tokenAddress);
     event SetCollateralFactorAmountEvent(uint _amount);
-    event SetBorrowersLPDataEvent(uint _baseBorrowersStableAmount);
     event InitBorrowerLoanEvent(address _borrowerAddress, uint _lpAmount, uint _stableAmount);
     event CloseBorrowerLoanEvent(address _borrowerAddress, uint _lpAmount, uint _stableAmount);
     event InterestBorrowerLoanEvent(
@@ -18,6 +17,7 @@ abstract contract LoanBorrower is LoanCreditor {
         uint _creditorLpAmount,
         uint _creditorStableAmount
     );
+    event SetLoanExchangerEvent(address _address);
 
     struct Borrower {
         bool exists;
@@ -31,12 +31,12 @@ abstract contract LoanBorrower is LoanCreditor {
         uint arrayIndex;
     }
 
-    uint public baseBorrowersStableAmount;
     mapping(address => Borrower) public borrowers;
     address[] private borrowersList;
     uint private borrowerLPPool;
     IERC20 public borrowerLPToken;
     uint private collateralFactorAmount; // in percent, less than 100
+    ILoanExchanger private loanExchanger;
 
     /// Constructor
     /// @param _borrowerLPToken uint
@@ -62,6 +62,19 @@ abstract contract LoanBorrower is LoanCreditor {
         return borrowers[_borrowerAddress];
     }
 
+    /// Return loan exchanger
+    /// @return ILoanExchanger
+    function getLoanExchanger() public view returns(ILoanExchanger) {
+        return loanExchanger;
+    }
+
+    /// Set loan exchanger
+    /// @param _exchangerAddress ILoanExchanger
+    function setLoanExchanger(ILoanExchanger _exchangerAddress) external onlyOwner {
+        loanExchanger = _exchangerAddress;
+        emit SetLoanExchangerEvent(address(_exchangerAddress));
+    }
+
     /// Set borrower LP token
     /// @param _lpToken ILPERC20
     function setBorrowerLPToken(IERC20 _lpToken) public onlyOwner {
@@ -79,19 +92,11 @@ abstract contract LoanBorrower is LoanCreditor {
         emit SetCollateralFactorAmountEvent(_amount);
     }
 
-    /// Set borrower LP data (method for deployment, not for production)
-    /// @param _baseBorrowersStableAmount uint
-    function setBorrowersLPData(uint _baseBorrowersStableAmount) external onlyOwner {
-        baseBorrowersStableAmount = _baseBorrowersStableAmount;
-
-        emit SetBorrowersLPDataEvent(_baseBorrowersStableAmount);
-    }
-
     /// Calculate borrower LP to stable
     /// @param _lpAmount uint
     /// @return uint
     function calcBorrowerLpToStable(uint _lpAmount) internal view returns(uint) {
-        return _lpAmount * baseBorrowersStableAmount / borrowerLPToken.totalSupply();
+        return _lpAmount * loanExchanger.getPricePerShare();
     }
 
     /// Calculate borrower loan stable amount (borrower take loan)
@@ -121,6 +126,7 @@ abstract contract LoanBorrower is LoanCreditor {
 
         borrowersList.push(senderAddress);
 
+        // TODO: needs optimization
         borrowers[senderAddress].lpBalanceInit = _lpAmount;
         borrowers[senderAddress].stableBalanceInit = stableAmount;
         borrowers[senderAddress].blockNumberInit = block.number;
@@ -148,6 +154,7 @@ abstract contract LoanBorrower is LoanCreditor {
         require(borrowerLPToken.balanceOf(address(this)) >= lpAmount, "LoanBorrower: LP balance is not enough");
         borrowerLPToken.transfer(senderAddress, lpAmount);
 
+        // TODO: needs optimization
         borrowers[senderAddress].lpBalanceInit = 0;
         borrowers[senderAddress].stableBalanceInit = 0;
         borrowers[senderAddress].blockNumberInit = 0;
@@ -169,21 +176,20 @@ abstract contract LoanBorrower is LoanCreditor {
     /// @param _borrowerAddress address
     /// @return uint
     function calcInterestBorrowerProfit(address _borrowerAddress) internal view returns(uint) {
-        //TODO: update calculation borrower profit logic
-        uint borrowerBlocksDif = block.number - borrowers[_borrowerAddress].blockNumberLast;
-        if (borrowerBlocksDif == 0) {
+        uint currentLpPrice = loanExchanger.getPricePerShare();
+        uint stableValue = borrowers[_borrowerAddress].lpBalanceLast * currentLpPrice;
+        if (stableValue <= borrowers[_borrowerAddress].stableBalanceLast) {
             return 0;
         }
 
-        uint percentByBlockValue = 1;
-        uint percentByBlockMultiply = 10000;
+        uint res = (stableValue - borrowers[_borrowerAddress].stableBalanceLast) / currentLpPrice;
 
-        return borrowers[_borrowerAddress].lpBalanceInit * percentByBlockValue / percentByBlockMultiply;
+        return res;
     }
 
     /// Interest borrower loan
     /// @param _borrowerAddress address
-    function interestBorrowerLoan(address _borrowerAddress) internal nonReentrant {
+    function interestBorrowerLoan(address _borrowerAddress) internal {
         uint fullBorrowerProfit = calcInterestBorrowerProfit(_borrowerAddress);
         if (fullBorrowerProfit == 0) {
             return;
@@ -191,16 +197,21 @@ abstract contract LoanBorrower is LoanCreditor {
 
         uint creditorLpProfit = calcCreditorProfitInLP(fullBorrowerProfit);
         uint borrowerLpProfit = fullBorrowerProfit - creditorLpProfit;
-        uint borrowerStableProfit = calcBorrowerLpToStable(borrowerLpProfit);
 
-        chargeCreditorProfit(creditorLpProfit);
+        require(address(loanExchanger) != address(0), "LoanBorrower: exchanger is not set");
+        require(borrowerLPToken.balanceOf(address(this)) >= creditorLpProfit, "LoanBorrower: LP balance not enough");
+        borrowerLPToken.approve(address(loanExchanger), creditorLpProfit);
+        //TODO: update this logic
+        loanExchanger.swapTokens();
+        uint exchangedStableBalance = getCreditorStableToken().allowance(address(loanExchanger), address(this));
+        getCreditorStableToken().transferFrom(address(loanExchanger), address(this), exchangedStableBalance);
 
-        borrowers[_borrowerAddress].lpBalanceLast = borrowerLpProfit;
-        borrowers[_borrowerAddress].lpBalanceLast = borrowerStableProfit;
+        borrowers[_borrowerAddress].lpBalanceLast -= creditorLpProfit;
+        borrowers[_borrowerAddress].stableBalanceLast += exchangedStableBalance;
         borrowers[_borrowerAddress].blockNumberLast = block.number;
 
         emit InterestBorrowerLoanEvent(
-            _borrowerAddress, borrowerLpProfit, borrowerStableProfit,
+            _borrowerAddress, borrowerLpProfit, exchangedStableBalance,
             creditorLpProfit, calcBorrowerLpToStable(creditorLpProfit)
         );
     }

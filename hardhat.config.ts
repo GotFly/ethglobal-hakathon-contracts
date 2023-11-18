@@ -1,4 +1,3 @@
-import { HardhatUserConfig } from "hardhat/config";
 import "@nomicfoundation/hardhat-toolbox";
 import "@openzeppelin/hardhat-upgrades";
 
@@ -72,6 +71,11 @@ const config = {
       url: process.env.NETWORK_HOST_XDC,
       accounts: [process.env.OWNER_PK_FINANCE],
       chainId: 50
+    },
+    lineaMainnet: {
+      url: process.env.NETWORK_HOST_LINEA,
+      accounts: [process.env.OWNER_PK_FINANCE],
+      chainId: 59144
     },
     ethereumTestnet: {
       url: process.env.NETWORK_HOST_ETHEREUM_TESTNET,
