@@ -64,7 +64,7 @@ describe("Loan test", function () {
 
         const creditorStableValue = 100000000;
 
-        await loanCreditorStableTestToken.transfer(creditor1.address, creditorStableValue);
+        await expect(loanCreditorStableTestToken.transfer(creditor1.address, creditorStableValue)).to.be.not.reverted;
         expect(await loanCreditorStableTestToken.balanceOf(creditor1.address)).to.equal(creditorStableValue);
         expect(await loanCreditorStableTestToken.balanceOf(loan.address)).to.equal(0);
         expect(await loanCreditorLpTestToken.totalSupply()).to.equal(0);
@@ -72,14 +72,17 @@ describe("Loan test", function () {
         const loanCreditorStableTestTokenAsCreditor1 = LoanCreditorStableTestToken__factory.connect(loanCreditorStableTestToken.address, creditor1);
         const loanAsCreditor1 = Loan__factory.connect(loan.address, creditor1);
 
-        await loanCreditorStableTestTokenAsCreditor1.approve(loan.address, creditorStableValue);
+        await expect(loanCreditorStableTestTokenAsCreditor1.approve(loan.address, creditorStableValue)).to.be.not.reverted;
         expect(await loanCreditorStableTestToken.allowance(creditor1.address, loan.address)).to.equal(creditorStableValue);
 
-        await loanAsCreditor1.addCreditorLiquidity(creditorStableValue);
+        await expect(loanAsCreditor1.addCreditorLiquidity(creditorStableValue)).to.be.not.reverted;
         expect(await loanCreditorStableTestToken.balanceOf(creditor1.address)).to.equal(0);
         expect(await loanCreditorStableTestToken.balanceOf(loan.address)).to.equal(creditorStableValue);
         expect(await loanCreditorLpTestToken.balanceOf(creditor1.address)).to.equal(creditorStableValue);
         expect(await loanCreditorLpTestToken.totalSupply()).to.equal(creditorStableValue);
+        const creditorData = await loan.getCreditorData(creditor1.address);
+        expect(creditorData.exists).to.equal(true);
+        expect(creditorData.lpBalance.toString()).to.equal(creditorStableValue.toString());
     });
 
     it("Should successfully remove credit liquidity", async function () {
@@ -93,7 +96,7 @@ describe("Loan test", function () {
 
         const creditorStableValue = 100000000;
 
-        await loanCreditorStableTestToken.transfer(creditor1.address, creditorStableValue);
+        await expect(loanCreditorStableTestToken.transfer(creditor1.address, creditorStableValue)).to.be.not.reverted;
         expect(await loanCreditorStableTestToken.balanceOf(creditor1.address)).to.equal(creditorStableValue);
         expect(await loanCreditorStableTestToken.balanceOf(loan.address)).to.equal(0);
         expect(await loanCreditorLpTestToken.totalSupply()).to.equal(0);
@@ -102,21 +105,27 @@ describe("Loan test", function () {
         const loanCreditorLpTestTokenAsCreditor1 = LoanCreditorLpTestToken__factory.connect(loanCreditorLpTestToken.address, creditor1);
         const loanAsCreditor1 = Loan__factory.connect(loan.address, creditor1);
 
-        await loanCreditorStableTestTokenAsCreditor1.approve(loan.address, creditorStableValue);
+        await expect(loanCreditorStableTestTokenAsCreditor1.approve(loan.address, creditorStableValue)).to.be.not.reverted;
         expect(await loanCreditorStableTestToken.allowance(creditor1.address, loan.address)).to.equal(creditorStableValue);
-        await loanAsCreditor1.addCreditorLiquidity(creditorStableValue);
+        await expect(loanAsCreditor1.addCreditorLiquidity(creditorStableValue)).to.be.not.reverted;
         expect(await loanCreditorStableTestToken.balanceOf(creditor1.address)).to.equal(0);
         expect(await loanCreditorStableTestToken.balanceOf(loan.address)).to.equal(creditorStableValue);
         expect(await loanCreditorLpTestToken.balanceOf(creditor1.address)).to.equal(creditorStableValue);
         expect(await loanCreditorLpTestToken.totalSupply()).to.equal(creditorStableValue);
+        const creditorDataCreate = await loan.getCreditorData(creditor1.address);
+        expect(creditorDataCreate.exists).to.equal(true);
+        expect(creditorDataCreate.lpBalance.toString()).to.equal(creditorStableValue.toString());
 
-        await loanCreditorLpTestTokenAsCreditor1.approve(loan.address, creditorStableValue);
+        await expect(loanCreditorLpTestTokenAsCreditor1.approve(loan.address, creditorStableValue)).to.be.not.reverted;
         expect(await loanCreditorLpTestToken.allowance(creditor1.address, loan.address)).to.equal(creditorStableValue);
-        await loanAsCreditor1.removeCreditorLiquidity(creditorStableValue);
+        await expect(loanAsCreditor1.removeCreditorLiquidity(creditorStableValue)).to.be.not.reverted;
         expect(await loanCreditorStableTestToken.balanceOf(creditor1.address)).to.equal(creditorStableValue);
         expect(await loanCreditorStableTestToken.balanceOf(loan.address)).to.equal(0);
         expect(await loanCreditorLpTestToken.balanceOf(creditor1.address)).to.equal(0);
         expect(await loanCreditorLpTestToken.totalSupply()).to.equal(0);
+        const creditorDataRemove = await loan.getCreditorData(creditor1.address);
+        expect(creditorDataRemove.exists).to.equal(true);
+        expect(creditorDataRemove.lpBalance.toString()).to.equal("0");
     });
 
     it("Should successfully init borrow loan", async function () {
@@ -131,7 +140,7 @@ describe("Loan test", function () {
         const creditorStableValue = 100000000;
         const borrowerLpValue = 50000000;
 
-        await loanCreditorStableTestToken.transfer(creditor1.address, creditorStableValue);
+        await expect(loanCreditorStableTestToken.transfer(creditor1.address, creditorStableValue)).to.be.not.reverted;
         expect(await loanCreditorStableTestToken.balanceOf(creditor1.address)).to.equal(creditorStableValue);
         expect(await loanCreditorStableTestToken.balanceOf(loan.address)).to.equal(0);
         expect(await loanCreditorLpTestToken.totalSupply()).to.equal(0);
@@ -142,24 +151,27 @@ describe("Loan test", function () {
         const loanBorrowerLpTestTokenAsBorrower1 = LoanBorrowerLpTestToken__factory.connect(loanBorrowerLpTestToken.address, borrower1);
         const loanAsBorrower1 = Loan__factory.connect(loan.address, borrower1);
 
-        await loanCreditorStableTestTokenAsCreditor1.approve(loan.address, creditorStableValue);
+        await expect(loanCreditorStableTestTokenAsCreditor1.approve(loan.address, creditorStableValue)).to.be.not.reverted;
         expect(await loanCreditorStableTestToken.allowance(creditor1.address, loan.address)).to.equal(creditorStableValue);
 
-        await loanAsCreditor1.addCreditorLiquidity(creditorStableValue);
+        await expect(loanAsCreditor1.addCreditorLiquidity(creditorStableValue)).to.be.not.reverted;
         expect(await loanCreditorStableTestToken.balanceOf(creditor1.address)).to.equal(0);
         expect(await loanCreditorStableTestToken.balanceOf(loan.address)).to.equal(creditorStableValue);
         expect(await loanCreditorLpTestToken.balanceOf(creditor1.address)).to.equal(creditorStableValue);
         expect(await loanCreditorLpTestToken.totalSupply()).to.equal(creditorStableValue);
+        const creditorData = await loan.getCreditorData(creditor1.address);
+        expect(creditorData.exists).to.equal(true);
+        expect(creditorData.lpBalance.toString()).to.equal(creditorStableValue.toString());
 
-        await loanBorrowerLpTestToken.mint(borrower1.address, borrowerLpValue);
+        await expect(loanBorrowerLpTestToken.mint(borrower1.address, borrowerLpValue)).to.be.not.reverted;
         expect(await loanBorrowerLpTestToken.balanceOf(borrower1.address)).to.equal(borrowerLpValue);
-        await loan.setBorrowersLPData(await loanBorrowerLpTestToken.totalSupply());
+        await expect(loan.setBorrowersLPData(await loanBorrowerLpTestToken.totalSupply())).to.be.not.reverted;
 
-        await loanBorrowerLpTestTokenAsBorrower1.approve(loan.address, borrowerLpValue);
+        await expect(loanBorrowerLpTestTokenAsBorrower1.approve(loan.address, borrowerLpValue)).to.be.not.reverted;
         expect(await loanBorrowerLpTestToken.allowance(borrower1.address, loan.address)).to.equal(borrowerLpValue);
 
         const loanStableValue = borrowerLpValue * baseCollateralFactor / 100;
-        await loanAsBorrower1.initBorrowerLoan(borrowerLpValue);
+        await expect(loanAsBorrower1.initBorrowerLoan(borrowerLpValue)).to.be.not.reverted;
         expect(await loanCreditorStableTestToken.balanceOf(borrower1.address)).to.equal(loanStableValue);
         expect(await loanCreditorStableTestToken.balanceOf(loan.address)).to.equal(creditorStableValue - loanStableValue);
         expect(await loanBorrowerLpTestToken.balanceOf(borrower1.address)).to.equal(0);
@@ -169,11 +181,11 @@ describe("Loan test", function () {
         const borrowerLoan = await loan.getBorrowerData(borrower1.address);
         expect(borrowerLoan.exists).to.equal(true);
         expect(borrowerLoan.hasLoan).to.equal(true);
-        expect(borrowerLoan.lpBalanceInit.toString()).to.equal("50000000");
-        expect(borrowerLoan.stableBalanceInit.toString()).to.equal("50000000");
+        expect(borrowerLoan.lpBalanceInit.toString()).to.equal(borrowerLpValue.toString());
+        expect(borrowerLoan.stableBalanceInit.toString()).to.equal((borrowerLpValue * baseCollateralFactor / 100).toString());
         expect(borrowerLoan.blockNumberInit.toString()).not.equal("0");
-        expect(borrowerLoan.lpBalanceCurrent.toString()).to.equal("50000000");
-        expect(borrowerLoan.stableBalanceCurrent.toString()).to.equal("50000000");
+        expect(borrowerLoan.lpBalanceLast.toString()).to.equal(borrowerLpValue.toString());
+        expect(borrowerLoan.stableBalanceLast.toString()).to.equal((borrowerLpValue * baseCollateralFactor / 100).toString());
     });
 
     it("Should successfully close borrow loan", async function () {
@@ -188,7 +200,7 @@ describe("Loan test", function () {
         const creditorStableValue = 100000000;
         const borrowerLpValue = 50000000;
 
-        await loanCreditorStableTestToken.transfer(creditor1.address, creditorStableValue);
+        await expect(loanCreditorStableTestToken.transfer(creditor1.address, creditorStableValue)).to.be.not.reverted;
         expect(await loanCreditorStableTestToken.balanceOf(creditor1.address)).to.equal(creditorStableValue);
         expect(await loanCreditorStableTestToken.balanceOf(loan.address)).to.equal(0);
         expect(await loanCreditorLpTestToken.totalSupply()).to.equal(0);
@@ -200,24 +212,27 @@ describe("Loan test", function () {
         const loanAsBorrower1 = Loan__factory.connect(loan.address, borrower1);
         const loanCreditorStableTestTokenAsBorrower1 = LoanCreditorStableTestToken__factory.connect(loanCreditorStableTestToken.address, borrower1);
 
-        await loanCreditorStableTestTokenAsCreditor1.approve(loan.address, creditorStableValue);
+        await expect(loanCreditorStableTestTokenAsCreditor1.approve(loan.address, creditorStableValue)).to.be.not.reverted;
         expect(await loanCreditorStableTestToken.allowance(creditor1.address, loan.address)).to.equal(creditorStableValue);
 
-        await loanAsCreditor1.addCreditorLiquidity(creditorStableValue);
+        await expect(loanAsCreditor1.addCreditorLiquidity(creditorStableValue)).to.be.not.reverted;
         expect(await loanCreditorStableTestToken.balanceOf(creditor1.address)).to.equal(0);
         expect(await loanCreditorStableTestToken.balanceOf(loan.address)).to.equal(creditorStableValue);
         expect(await loanCreditorLpTestToken.balanceOf(creditor1.address)).to.equal(creditorStableValue);
         expect(await loanCreditorLpTestToken.totalSupply()).to.equal(creditorStableValue);
+        const creditorData = await loan.getCreditorData(creditor1.address);
+        expect(creditorData.exists).to.equal(true);
+        expect(creditorData.lpBalance.toString()).to.equal(creditorStableValue.toString());
 
         await loanBorrowerLpTestToken.mint(borrower1.address, borrowerLpValue);
         expect(await loanBorrowerLpTestToken.balanceOf(borrower1.address)).to.equal(borrowerLpValue);
-        await loan.setBorrowersLPData(await loanBorrowerLpTestToken.totalSupply());
+        await expect(loan.setBorrowersLPData(await loanBorrowerLpTestToken.totalSupply())).to.be.not.reverted;
 
-        await loanBorrowerLpTestTokenAsBorrower1.approve(loan.address, borrowerLpValue);
+        await expect(loanBorrowerLpTestTokenAsBorrower1.approve(loan.address, borrowerLpValue)).to.be.not.reverted;
         expect(await loanBorrowerLpTestToken.allowance(borrower1.address, loan.address)).to.equal(borrowerLpValue);
 
         const loanStableValue = borrowerLpValue * baseCollateralFactor / 100;
-        await loanAsBorrower1.initBorrowerLoan(borrowerLpValue);
+        await expect(loanAsBorrower1.initBorrowerLoan(borrowerLpValue)).to.be.not.reverted;
         expect(await loanCreditorStableTestToken.balanceOf(borrower1.address)).to.equal(loanStableValue);
         expect(await loanCreditorStableTestToken.balanceOf(loan.address)).to.equal(creditorStableValue - loanStableValue);
         expect(await loanBorrowerLpTestToken.balanceOf(borrower1.address)).to.equal(0);
@@ -227,17 +242,17 @@ describe("Loan test", function () {
         const borrowerOpenLoan = await loan.getBorrowerData(borrower1.address);
         expect(borrowerOpenLoan.exists).to.equal(true);
         expect(borrowerOpenLoan.hasLoan).to.equal(true);
-        expect(borrowerOpenLoan.lpBalanceInit.toString()).to.equal("50000000");
-        expect(borrowerOpenLoan.stableBalanceInit.toString()).to.equal("50000000");
+        expect(borrowerOpenLoan.lpBalanceInit.toString()).to.equal(borrowerLpValue.toString());
+        expect(borrowerOpenLoan.stableBalanceInit.toString()).to.equal((borrowerLpValue * baseCollateralFactor / 100).toString());
         expect(borrowerOpenLoan.blockNumberInit.toString()).not.equal("0");
-        expect(borrowerOpenLoan.lpBalanceCurrent.toString()).to.equal("50000000");
-        expect(borrowerOpenLoan.stableBalanceCurrent.toString()).to.equal("50000000");
+        expect(borrowerOpenLoan.lpBalanceLast.toString()).to.equal(borrowerLpValue.toString());
+        expect(borrowerOpenLoan.stableBalanceLast.toString()).to.equal((borrowerLpValue * baseCollateralFactor / 100).toString());
 
-        await loanCreditorStableTestTokenAsBorrower1.approve(loan.address, loanStableValue);
+        await expect(loanCreditorStableTestTokenAsBorrower1.approve(loan.address, loanStableValue)).to.be.not.reverted;
         expect(await loanCreditorStableTestToken.allowance(borrower1.address, loan.address)).to.equal(loanStableValue);
 
         const loanLpValue = loanStableValue * 100 / baseCollateralFactor;
-        await loanAsBorrower1.closeBorrowerLoan(loanStableValue);
+        await expect(loanAsBorrower1.closeBorrowerLoan()).to.be.not.reverted;
         expect(await loanBorrowerLpTestToken.balanceOf(borrower1.address)).to.equal(loanLpValue);
         expect(await loanBorrowerLpTestToken.balanceOf(loan.address)).to.equal(0);
         expect(await loanCreditorStableTestToken.balanceOf(borrower1.address)).to.equal(0);
@@ -249,7 +264,84 @@ describe("Loan test", function () {
         expect(borrowerCloseLoan.lpBalanceInit.toString()).to.equal("0");
         expect(borrowerCloseLoan.stableBalanceInit.toString()).to.equal("0");
         expect(borrowerCloseLoan.blockNumberInit.toString()).to.equal("0");
-        expect(borrowerCloseLoan.lpBalanceCurrent.toString()).to.equal("0");
-        expect(borrowerCloseLoan.stableBalanceCurrent.toString()).to.equal("0");
+        expect(borrowerCloseLoan.lpBalanceLast.toString()).to.equal("0");
+        expect(borrowerCloseLoan.stableBalanceLast.toString()).to.equal("0");
+    });
+
+    it("Should successfully init borrow loan with removing creditor liquidity", async function () {
+        const {
+            LoanBorrowerLpTestToken, loanBorrowerLpTestToken,
+            LoanCreditorLpTestToken, loanCreditorLpTestToken,
+            LoanCreditorStableTestToken, loanCreditorStableTestToken,
+            Loan, loan,
+            owner, creditor1, creditor2, borrower1, borrower2
+        } = await loadFixture(deployContractsFixture);
+
+        const creditorStableValue = 100000000;
+        const borrowerLpValue = 50000000;
+
+        await expect(loanCreditorStableTestToken.transfer(creditor1.address, creditorStableValue)).to.be.not.reverted;
+        expect(await loanCreditorStableTestToken.balanceOf(creditor1.address)).to.equal(creditorStableValue);
+        expect(await loanCreditorStableTestToken.balanceOf(loan.address)).to.equal(0);
+        expect(await loanCreditorLpTestToken.totalSupply()).to.equal(0);
+        expect(await loanBorrowerLpTestToken.totalSupply()).to.equal(0);
+
+        const loanCreditorStableTestTokenAsCreditor1 = LoanCreditorStableTestToken__factory.connect(loanCreditorStableTestToken.address, creditor1);
+        const loanAsCreditor1 = Loan__factory.connect(loan.address, creditor1);
+        const loanBorrowerLpTestTokenAsBorrower1 = LoanBorrowerLpTestToken__factory.connect(loanBorrowerLpTestToken.address, borrower1);
+        const loanAsBorrower1 = Loan__factory.connect(loan.address, borrower1);
+        const loanCreditorLpTestTokenAsCreditor1 = LoanCreditorLpTestToken__factory.connect(loanCreditorLpTestToken.address, creditor1);
+
+        await expect(loanCreditorStableTestTokenAsCreditor1.approve(loan.address, creditorStableValue)).to.be.not.reverted;
+        expect(await loanCreditorStableTestToken.allowance(creditor1.address, loan.address)).to.equal(creditorStableValue);
+
+        await loanAsCreditor1.addCreditorLiquidity(creditorStableValue);
+        expect(await loanCreditorStableTestToken.balanceOf(creditor1.address)).to.equal(0);
+        expect(await loanCreditorStableTestToken.balanceOf(loan.address)).to.equal(creditorStableValue);
+        expect(await loanCreditorLpTestToken.balanceOf(creditor1.address)).to.equal(creditorStableValue);
+        expect(await loanCreditorLpTestToken.totalSupply()).to.equal(creditorStableValue);
+        const creditorData = await loan.getCreditorData(creditor1.address);
+        expect(creditorData.exists).to.equal(true);
+        expect(creditorData.lpBalance.toString()).to.equal(creditorStableValue.toString());
+
+        await expect(loanBorrowerLpTestToken.mint(borrower1.address, borrowerLpValue)).to.be.not.reverted;
+        expect(await loanBorrowerLpTestToken.balanceOf(borrower1.address)).to.equal(borrowerLpValue);
+        await expect(loan.setBorrowersLPData(await loanBorrowerLpTestToken.totalSupply())).to.be.not.reverted;
+
+        await loanBorrowerLpTestTokenAsBorrower1.approve(loan.address, borrowerLpValue);
+        expect(await loanBorrowerLpTestToken.allowance(borrower1.address, loan.address)).to.equal(borrowerLpValue);
+
+        const loanStableValue = borrowerLpValue * baseCollateralFactor / 100;
+        await expect(loanAsBorrower1.initBorrowerLoan(borrowerLpValue)).to.be.not.reverted;
+        expect(await loanCreditorStableTestToken.balanceOf(borrower1.address)).to.equal(loanStableValue);
+        expect(await loanCreditorStableTestToken.balanceOf(loan.address)).to.equal(creditorStableValue - loanStableValue);
+        expect(await loanBorrowerLpTestToken.balanceOf(borrower1.address)).to.equal(0);
+        expect(await loanBorrowerLpTestToken.balanceOf(loan.address)).to.equal(borrowerLpValue);
+        expect(await loanCreditorLpTestToken.totalSupply()).to.equal(creditorStableValue);
+
+        const borrowerLoan = await loan.getBorrowerData(borrower1.address);
+        expect(borrowerLoan.exists).to.equal(true);
+        expect(borrowerLoan.hasLoan).to.equal(true);
+        expect(borrowerLoan.lpBalanceInit.toString()).to.equal(borrowerLpValue.toString());
+        expect(borrowerLoan.stableBalanceInit.toString()).to.equal((borrowerLpValue * baseCollateralFactor / 100).toString());
+        expect(borrowerLoan.blockNumberInit.toString()).not.equal("0");
+        expect(borrowerLoan.lpBalanceLast.toString()).to.equal(borrowerLpValue.toString());
+        expect(borrowerLoan.stableBalanceLast.toString()).to.equal((borrowerLpValue * baseCollateralFactor / 100).toString());
+
+        await expect(loanCreditorLpTestTokenAsCreditor1.approve(loan.address, creditorStableValue)).to.be.not.reverted;
+        expect(await loanCreditorLpTestToken.allowance(creditor1.address, loan.address)).to.equal(creditorStableValue);
+        await expect(loanAsCreditor1.removeCreditorLiquidity(creditorStableValue))
+            .to.be.revertedWith("LoanCreditor: not enough liquidity");
+        const creditorLpBalance = creditorData.lpBalance;
+        const creditorAvailableLpBalance = await loan.getCreditorAvailableLpLiquidity(creditor1.address);
+        const creditorAvailableStableBalance = await loan.getCreditorAvailableStableLiquidity(creditor1.address);
+        expect(creditorAvailableLpBalance).to.equal(creditorLpBalance - loanStableValue);
+        await expect(loanAsCreditor1.removeCreditorLiquidity(creditorAvailableLpBalance)).to.be.not.reverted;
+        const creditorDataTemp = await loan.getCreditorData(creditor1.address);
+        expect(await loanCreditorStableTestToken.balanceOf(creditor1.address)).to.equal(creditorAvailableStableBalance);
+        expect(await loanCreditorStableTestToken.balanceOf(loan.address)).to.equal(0);
+        expect(await loanCreditorLpTestToken.balanceOf(creditor1.address)).to.equal(creditorLpBalance - creditorAvailableLpBalance);
+        expect(await loanCreditorLpTestToken.balanceOf(creditor1.address)).to.equal(creditorDataTemp.lpBalance);
+        expect(await loanCreditorLpTestToken.balanceOf(loan.address)).to.equal(0);
     });
 });

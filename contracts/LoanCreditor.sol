@@ -5,7 +5,6 @@ import "./libs/Ownable.sol";
 import "./libs/ReentrancyGuard.sol";
 import "./interfaces/IERC20.sol";
 import "./interfaces/ILPERC20.sol";
-import "hardhat/console.sol";
 
 abstract contract LoanCreditor is Ownable, ReentrancyGuard {
 
@@ -16,6 +15,7 @@ abstract contract LoanCreditor is Ownable, ReentrancyGuard {
     event AddCreditorLandingInterestEvent(uint _stableAmount);
     event CreateBorrowerLoanEvent(address _borrowerAddress, uint _stableAmount);
     event RemoveBorrowerLoanEvent(address _borrowerAddress, uint _lpAmount);
+    event SetCreditorProfitInPercentEvent(uint _value);
 
     struct Creditor {
         bool exists;
@@ -28,6 +28,7 @@ abstract contract LoanCreditor is Ownable, ReentrancyGuard {
     uint private creditorStablePool;
     IERC20 public creditorStableToken;
     ILPERC20 public creditorLPToken;
+    uint public creditorProfitInPercent;
 
     // How to calculate LP token rate: creditorStablePool / creditorLPToken.totalSupply()
 
@@ -41,7 +42,7 @@ abstract contract LoanCreditor is Ownable, ReentrancyGuard {
 
     /// Return creditor stable pool
     /// @return uint
-    function getCreditorStablePool() public view returns(uint) {
+    function getCreditorStablePool() external view returns(uint) {
         return creditorStablePool;
     }
 
@@ -49,6 +50,39 @@ abstract contract LoanCreditor is Ownable, ReentrancyGuard {
     /// @return IERC20
     function getCreditorStableToken() public view returns(IERC20) {
         return creditorStableToken;
+    }
+
+    /// Return creditor profit in percent
+    /// @return uint
+    function getCreditorProfitInPercent() public view returns(uint) {
+        return creditorProfitInPercent;
+    }
+
+    /// Return creditor data
+    /// @param _creditorAddress address
+    /// @return Creditor
+    function getCreditorData(address _creditorAddress) external view returns(Creditor memory) {
+        return creditors[_creditorAddress];
+    }
+
+    /// Return creditor available stable liquidity (check creditorStableToken.balanceOf(address(this)), if it less, so available balance is token balance)
+    /// @param _creditorAddress address
+    /// @return uint
+    function getCreditorAvailableStableLiquidity(address _creditorAddress) external view returns(uint) {
+        uint stableBalance = creditorStableToken.balanceOf(address(this));
+        uint creditorStable = calcCreditorStableAmount(creditors[_creditorAddress].lpBalance);
+
+        return stableBalance >= creditorStable ? creditorStable : stableBalance;
+    }
+
+    /// Return creditor available stable liquidity
+    /// @param _creditorAddress address
+    /// @return uint
+    function getCreditorAvailableLpLiquidity(address _creditorAddress) external view returns(uint) {
+        uint lpBalance = calcCreditorLPAmount(creditorStableToken.balanceOf(address(this)));
+        uint creditorLp = creditors[_creditorAddress].lpBalance;
+
+        return lpBalance >= creditorLp ? creditorLp : lpBalance;
     }
 
     /// Set creditor stable token
@@ -63,6 +97,14 @@ abstract contract LoanCreditor is Ownable, ReentrancyGuard {
     function setCreditorLPToken(ILPERC20 _token) external onlyOwner {
         creditorLPToken = _token;
         emit SetCreditorLPTokenEvent(address(_token));
+    }
+
+    /// Set creditor profit in percent
+    /// @param _value uint
+    function setCreditorProfitInPercent(uint _value) external onlyOwner {
+        require(_value <= 100, "LoanCreditor: invalid profit percent value");
+        creditorProfitInPercent = _value;
+        emit SetCreditorProfitInPercentEvent(_value);
     }
 
     /// Calculate creditor LP amount
@@ -122,7 +164,7 @@ abstract contract LoanCreditor is Ownable, ReentrancyGuard {
         require(_lpAmount <= creditorLPToken.allowance(senderAddress, selfAddress), "LoanCreditor: not enough allowance"); // we may not do allowance, but we do it
 
         uint stableAmount = calcCreditorStableAmount(_lpAmount);
-        require(stableAmount >= creditorStableToken.balanceOf(address(this)), "LoanCreditor: not enough liquidity");
+        require(creditorStableToken.balanceOf(address(this)) >= stableAmount, "LoanCreditor: not enough liquidity");
 
         creditors[senderAddress].lpBalance -= _lpAmount;
         creditorStablePool -= stableAmount;
@@ -151,6 +193,23 @@ abstract contract LoanCreditor is Ownable, ReentrancyGuard {
         creditorStableToken.transfer(_borrowerAddress, _stableAmount);
 
         emit CreateBorrowerLoanEvent(_borrowerAddress, _stableAmount);
+    }
+
+    /// ********************
+    /// Liquid profit logic
+    /// ********************
+
+    /// Calculate creditor profit in LP
+    /// @param _fullProfitInLp uint
+    /// @return uint
+    function calcCreditorProfitInLP(uint _fullProfitInLp) internal view returns(uint) {
+        return _fullProfitInLp * creditorProfitInPercent / 100;
+    }
+
+    /// Charge creditor profit
+    /// @param _lpAmount uint
+    function chargeCreditorProfit(uint _lpAmount) internal {
+        //TODO: add charging creditor profit
     }
 }
 

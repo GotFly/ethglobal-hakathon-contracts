@@ -6,6 +6,8 @@ require('dotenv').config();
 
 import './tasks/accounts_task';
 import './tasks/deployloan_task';
+import './tasks/deploystable_task';
+import './tasks/deployborrowerlp_task';
 
 const config = {
   solidity: {
@@ -70,6 +72,11 @@ const config = {
       url: process.env.NETWORK_HOST_XDC,
       accounts: [process.env.OWNER_PK_FINANCE],
       chainId: 50
+    },
+    ethereumTestnet: {
+      url: process.env.NETWORK_HOST_ETHEREUM_TESTNET,
+      accounts: [process.env.OWNER_PK_FINANCE_TESTNET],
+      chainId: 11155111
     },
   },
 };

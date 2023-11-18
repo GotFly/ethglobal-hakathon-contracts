@@ -13,9 +13,5 @@ contract Loan is LoanBorrower {
     constructor(ILPERC20 _borrowerLPToken, uint _collateralFactorAmount, uint _baseCreditorsLPAmount, uint _baseCreditorsStableAmount)
     LoanBorrower(_borrowerLPToken, _collateralFactorAmount, _baseCreditorsLPAmount, _baseCreditorsStableAmount)
     {}
-
-    function interestDepositProfit() external onlyOwner {
-        // TODO: make creditors deposit profit logic
-    }
 }
 
