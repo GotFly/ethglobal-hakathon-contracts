@@ -103,6 +103,35 @@ const config = {
       chainId: 80001
     },
   },
+  customChains: [
+    {
+      network: "celoMainnet",
+      chainId: 42220,
+      urls: {
+        apiURL: "https://celoscan.io/api",
+        browserURL: "https://celoscan.io"
+      }
+    },
+    {
+      network: "scrollMainnet",
+      chainId: 534352,
+      urls: {
+        apiURL: "https://scrollscan.com/api",
+        browserURL: "https://scrollscan.com"
+      }
+    },
+  ],
+  etherscan: {
+    apiKey: {
+      celoMainnet: process.env.CELO_API_KEY,
+      scrollMainnet: process.env.SCROLL_API_KEY,
+    }
+  },
+  sourcify: {
+    // Disabled by default
+    // Doesn't need an API key
+    enabled: true
+  },
 };
 
 export default config;
