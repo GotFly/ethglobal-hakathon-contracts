@@ -72,7 +72,7 @@ contract LoanExchangerTest is ILoanExchanger, Ownable, ReentrancyGuard {
 
     /// Return price per share
     /// @return uint
-    function getPricePerShare() external view returns(uint) {
-        return 1;
+    function getPricePerShare() external pure returns(uint) {
+        return 1000000000000000000;
     }
 }

@@ -82,6 +82,11 @@ const config = {
       accounts: [process.env.OWNER_PK_FINANCE_TESTNET],
       chainId: 11155111
     },
+    polygonTestnet: {
+      url: process.env.NETWORK_HOST_POLYGON_TESTNET,
+      accounts: [process.env.OWNER_PK_FINANCE_TESTNET],
+      chainId: 80001
+    },
   },
 };
 

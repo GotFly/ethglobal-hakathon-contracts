@@ -96,7 +96,7 @@ abstract contract LoanBorrower is LoanCreditor {
     /// @param _lpAmount uint
     /// @return uint
     function calcBorrowerLpToStable(uint _lpAmount) internal view returns(uint) {
-        return _lpAmount * loanExchanger.getPricePerShare();
+        return _lpAmount * (loanExchanger.getPricePerShare() / 1000000) / 1000000000000;
     }
 
     /// Calculate borrower loan stable amount (borrower take loan)
@@ -177,14 +177,13 @@ abstract contract LoanBorrower is LoanCreditor {
     /// @return uint
     function calcInterestBorrowerProfit(address _borrowerAddress) internal view returns(uint) {
         uint currentLpPrice = loanExchanger.getPricePerShare();
-        uint stableValue = borrowers[_borrowerAddress].lpBalanceLast * currentLpPrice;
+//        uint stableValue = borrowers[_borrowerAddress].lpBalanceLast * currentLpPrice;
+        uint stableValue = calcBorrowerLpToStable(borrowers[_borrowerAddress].lpBalanceLast);
         if (stableValue <= borrowers[_borrowerAddress].stableBalanceLast) {
             return 0;
         }
 
-        uint res = (stableValue - borrowers[_borrowerAddress].stableBalanceLast) / currentLpPrice;
-
-        return res;
+        return (stableValue - borrowers[_borrowerAddress].stableBalanceLast) / currentLpPrice;
     }
 
     /// Interest borrower loan

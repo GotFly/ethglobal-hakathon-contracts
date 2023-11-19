@@ -17,6 +17,12 @@ abstract contract BaseLpToken is ERC20 {
         _;
     }
 
+    /// Return manipulator
+    /// @return address
+    function getManipulator() public view returns(address) {
+        return manipulator;
+    }
+
     /// Mint token
     /// @param _account address
     /// @param _amount uint256
@@ -29,11 +35,5 @@ abstract contract BaseLpToken is ERC20 {
     /// @param _amount uint256
     function burn(address _account, uint256 _amount) external onlyManipulator {
         _burn(_account, _amount);
-    }
-
-    /// Burn self tokens
-    /// @param _amount uint256
-    function selfBurn(uint256 _amount) external {
-        _burn(msg.sender, _amount);
     }
 }

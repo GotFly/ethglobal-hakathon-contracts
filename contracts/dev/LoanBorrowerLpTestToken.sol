@@ -12,6 +12,12 @@ contract LoanBorrowerLpTestToken is BaseLpToken {
     /// Return token decimals
     /// @return uint8
     function decimals() public view virtual override returns (uint8) {
-        return 6;
+        return 18;
+    }
+
+    /// Burn self tokens
+    /// @param _amount uint256
+    function selfBurn(uint256 _amount) external {
+        _burn(msg.sender, _amount);
     }
 }
