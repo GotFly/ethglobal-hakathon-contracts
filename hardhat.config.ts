@@ -47,6 +47,11 @@ const config = {
       accounts: [process.env.OWNER_PK_FINANCE],
       chainId: 137
     },
+    polygonZkMainnet: {
+      url: process.env.NETWORK_HOST_POLYGONZK,
+      accounts: [process.env.OWNER_PK_FINANCE],
+      chainId: 1101
+    },
     gnosisMainnet: {
       url: process.env.NETWORK_HOST_GNOSIS,
       accounts: [process.env.OWNER_PK_FINANCE],
@@ -76,6 +81,16 @@ const config = {
       url: process.env.NETWORK_HOST_LINEA,
       accounts: [process.env.OWNER_PK_FINANCE],
       chainId: 59144
+    },
+    scrollMainnet: {
+      url: process.env.NETWORK_HOST_SCROLL,
+      accounts: [process.env.OWNER_PK_FINANCE],
+      chainId: 534352
+    },
+    scrollTestnet: {
+      url: process.env.NETWORK_HOST_SCROLL_TESTNET,
+      accounts: [process.env.OWNER_PK_FINANCE_TESTNET],
+      chainId: 534351
     },
     ethereumTestnet: {
       url: process.env.NETWORK_HOST_ETHEREUM_TESTNET,
