@@ -1,4 +1,4 @@
-# Sample Hardhat Project
+#  .FInance protocol
 
 This project demonstrates a basic Hardhat use case. It comes with a sample contract, a test for that contract, and a script that deploys that contract.
 
@@ -12,37 +12,24 @@ npx hardhat node
 npx hardhat run scripts/deploy.ts
 ```
 
+## Demo video
+### https://youtu.be/smVJ1pL-7rE
 
-Contracts
 
-Arbitrum:
-Loan exchanger address: 0x6FF1F42837A66962490858253c16FdDfCD1Dbc06
-Loan address: 0xDEA0c50CB0B16A653573ca6adBDB21eC4Fe36E9C
+## Contracts
 
-Linea:
-Loan exchanger address: 0x6FF1F42837A66962490858253c16FdDfCD1Dbc06
-Loan address: 0x6cBAA635fC1f47a38e645eee7194dCCFE455A207
+#### Arbitrum:  0xDEA0c50CB0B16A653573ca6adBDB21eC4Fe36E9C
 
-Mantle:
-Loan exchanger address: 0x6FF1F42837A66962490858253c16FdDfCD1Dbc06
-Loan address: 0x6cBAA635fC1f47a38e645eee7194dCCFE455A207
+#### Linea: 0x6cBAA635fC1f47a38e645eee7194dCCFE455A207
 
-Base:
-Loan exchanger address: 0x6FF1F42837A66962490858253c16FdDfCD1Dbc06
-Loan address: 0x6cBAA635fC1f47a38e645eee7194dCCFE455A207
+#### Mantle:  0x6cBAA635fC1f47a38e645eee7194dCCFE455A207
 
-XDC:
-Loan exchanger address: 0x6FF1F42837A66962490858253c16FdDfCD1Dbc06
-Loan address: 0x6cBAA635fC1f47a38e645eee7194dCCFE455A207
+#### Base: 0x6cBAA635fC1f47a38e645eee7194dCCFE455A207
 
-Celo:
-Loan exchanger address: 0x6FF1F42837A66962490858253c16FdDfCD1Dbc06
-Loan address: 0x6cBAA635fC1f47a38e645eee7194dCCFE455A207
+#### XDC: 0x6cBAA635fC1f47a38e645eee7194dCCFE455A207
 
-Polygon zkEVM:
-Loan exchanger address: 0x6FF1F42837A66962490858253c16FdDfCD1Dbc06
-Loan address: 0x6cBAA635fC1f47a38e645eee7194dCCFE455A207
+#### Celo: 0x6cBAA635fC1f47a38e645eee7194dCCFE455A207
 
-Scroll:
-Loan exchanger address: 0x6FF1F42837A66962490858253c16FdDfCD1Dbc06
-Loan address: 0x6cBAA635fC1f47a38e645eee7194dCCFE455A207
+#### Polygon zkEVM: 0x6cBAA635fC1f47a38e645eee7194dCCFE455A207
+
+#### Scroll: 0x6cBAA635fC1f47a38e645eee7194dCCFE455A207
